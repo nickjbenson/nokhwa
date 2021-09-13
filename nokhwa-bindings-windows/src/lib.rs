@@ -362,7 +362,9 @@ pub mod wmf {
     static mut INITIALIZED: bool = false;
 
     // See: https://stackoverflow.com/questions/80160/what-does-coinit-speed-over-memory-do
-    const CO_INIT_APARTMENT_THREADED: COINIT = COINIT(0x2);
+    // Use the default multithreaded model for COM objects to maximize compatibility.
+    const CO_INIT_MULTI_THREADED: COINIT = COINIT(0x0);
+    // const CO_INIT_APARTMENT_THREADED: COINIT = COINIT(0x2);
     const CO_INIT_DISABLE_OLE1DDE: COINIT = COINIT(0x4);
 
     // See: https://gix.github.io/media-types/#major-types
@@ -388,7 +390,9 @@ pub mod wmf {
         if !(unsafe { INITIALIZED }) {
             let a = std::ptr::null_mut();
             if let Err(why) =
-                unsafe { CoInitializeEx(a, CO_INIT_APARTMENT_THREADED | CO_INIT_DISABLE_OLE1DDE) }
+                unsafe {
+                    CoInitializeEx(a, CO_INIT_MULTI_THREADED | CO_INIT_DISABLE_OLE1DDE)
+                }
             {
                 return Err(BindingError::InitializeError(why.to_string()));
             }
